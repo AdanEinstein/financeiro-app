@@ -59,6 +59,9 @@ export default function Sales({ route, navigation }) {
                 return newProdutos.length > 0 ? true : false;
             });
             setSales(newSales.length == 0 ? [] : newSales);
+        } else if (e.startsWith("@")) {
+            newSales = sales.filter((sale) => sale?.categoria?.startsWith(e));
+            setSales(newSales.length == 0 ? [] : newSales);
         } else {
             newSales = sales.filter((sale) => sale?.cliente?.startsWith(e));
             setSales(newSales.length == 0 ? [] : newSales);
@@ -106,13 +109,7 @@ export default function Sales({ route, navigation }) {
             ) : (
                 <View style={stylesHome.titleView}>
                     <Text style={stylesHome.title}>
-                        Nenhuma venda encontrada 😩
-                    </Text>
-                    <Text style={stylesHome.subtitle}>
-                        Mas não se preocupe.
-                    </Text>
-                    <Text style={stylesHome.subtitle}>
-                        Você consegue, eu acredito em você 🙏
+                        Nada para listar 😩
                     </Text>
                 </View>
             )}

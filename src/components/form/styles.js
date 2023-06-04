@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 	},
 	selectTipo:{
-		flex: 3
+		flex: 3,
 	},	
 	clear:{
 		flex: 1,
@@ -125,6 +125,12 @@ const styles = StyleSheet.create({
 	},
 	txtInputTipo: {
 		backgroundColor: '#FFF',
+	},
+	listField: {
+		backgroundColor: "#fff",
+		fontSize: 22,
+		padding: 10,
+		borderRadius: 5,
 	},
 });
 

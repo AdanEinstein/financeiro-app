@@ -42,18 +42,9 @@ const FormNew = ({ navigation, data }) => {
                     setCategorias([...categorys]);
                     setCategoria(categorys[0].descricao);
                 }
-            } catch (error) {}
+            } catch (error) { }
         }
         getCategorys();
-        // async function test() {
-        // 	// await AsyncStorage.clear()
-        // 	// await AsyncStorage.removeItem('@sales:venda')
-        // 	// console.log(await AsyncStorage.getAllKeys());
-        // 	console.log(await AsyncStorage.getItem("@sales:categoria"));
-        // 	console.log("------------------------------------------");
-        // 	console.log(await AsyncStorage.getItem("@sales:venda"));
-        // }
-        // test();
     }, [tipo]);
 
     useEffect(() => {
@@ -71,106 +62,61 @@ const FormNew = ({ navigation, data }) => {
 
     const handleCadastrar = async () => {
         const id = update ? data?.id : v4();
-        if (tipo == "sale") {
-            const sale = {
-                id,
-                cliente,
-                categoria,
-                numero,
-                dataDaVenda,
-                dataParaPagar,
-                produtos,
-                pago: false,
-            };
-
-            try {
-                await schemaCliente.validate(sale);
-            } catch (error) {
-                Alert.alert("Atenção", error.message);
-                return;
-            }
-
-            try {
-                const slsString = await AsyncStorage.getItem("@sales:venda");
-                let sls = JSON.parse(slsString);
-                if (sls == null) {
-                    await AsyncStorage.setItem(
-                        "@sales:venda",
-                        JSON.stringify([sale])
-                    );
-                } else {
-                    if (update) {
-                        sls = sls.map((s) => {
-                            if (s.id == sale.id) {
-                                return sale;
-                            }
-                            return s;
-                        });
-                    } else {
-                        sls.push(sale);
-                    }
-                    // console.log("sls: ", sls);
-                    await AsyncStorage.setItem(
-                        "@sales:venda",
-                        JSON.stringify(sls)
-                    );
-                }
-                setCliente("");
-                setNumero("");
-                setProdutos([]);
-                Alert.alert("Sucesso", "Dado registrado com sucesso!");
-                navigation.navigate("Vendas", { update: true });
-            } catch (error) {
-                Alert.alert(
-                    "Ocorreu um erro",
-                    "Infelizmente não consegui cadastrar estes dados!"
-                );
-                return;
-            }
+        const sale = {
+            id,
+            cliente,
+            categoria,
+            numero,
+            dataDaVenda,
+            dataParaPagar,
+            produtos,
+            pago: false,
+        };
+        try {
+            await schemaCliente.validate(sale);
+        } catch (error) {
+            Alert.alert("Atenção", error.message);
+            return;
         }
 
-        if (tipo == "category") {
-            const category = {
-                id,
-                descricao,
-            };
-
-            try {
-                await schemaCategoria.validate(category);
-            } catch (error) {
-                Alert.alert("Atenção", error.message);
-                return;
-            }
-
-            try {
-                const slsString = await AsyncStorage.getItem(
-                    "@sales:categoria"
+        try {
+            const slsString = await AsyncStorage.getItem("@sales:venda");
+            let sls = JSON.parse(slsString);
+            if (sls == null) {
+                await AsyncStorage.setItem(
+                    "@sales:venda",
+                    JSON.stringify([sale])
                 );
-                const sls = JSON.parse(slsString);
-                if (sls == null) {
-                    await AsyncStorage.setItem(
-                        "@sales:categoria",
-                        JSON.stringify([category])
-                    );
+            } else {
+                if (update) {
+                    sls = sls.map((s) => {
+                        if (s.id == sale.id) {
+                            return sale;
+                        }
+                        return s;
+                    });
                 } else {
-                    sls.push(category);
-                    await AsyncStorage.setItem(
-                        "@sales:categoria",
-                        JSON.stringify(sls)
-                    );
+                    sls.push(sale);
                 }
-                setDescricao("");
-                Alert.alert("Sucesso", "Dado registrado com sucesso!");
-                navigation.navigate("Vendas", { update: true });
-            } catch (error) {
-                Alert.alert(
-                    "Ocorreu um erro",
-                    "Infelizmente não consegui cadastrar estes dados!"
+                await AsyncStorage.setItem(
+                    "@sales:venda",
+                    JSON.stringify(sls)
                 );
-                return;
             }
+            setCliente("");
+            setNumero("");
+            setProdutos([]);
+            Alert.alert("Sucesso", "Dado registrado com sucesso!");
+            navigation.navigate("Vendas", { update: true });
+        } catch (error) {
+            Alert.alert(
+                "Ocorreu um erro",
+                "Infelizmente não consegui cadastrar estes dados!"
+            );
+            return;
         }
-    };
+
+    }
 
     const handleFormatPrice = (e, index) => {
         const val = e.replace(/\D/g, "");
@@ -239,6 +185,62 @@ const FormNew = ({ navigation, data }) => {
             return oldProdutos.filter((_, i) => i !== index);
         });
     };
+
+    const handleCadastrarCategory = async () => {
+        const id = v4()
+        const category = {
+            id,
+            descricao,
+        };
+        try {
+            await schemaCategoria.validate(category);
+        } catch (error) {
+            Alert.alert("Atenção", error.message);
+            return;
+        }
+
+        try {
+            const slsString = await AsyncStorage.getItem(
+                "@sales:categoria"
+            );
+            const sls = JSON.parse(slsString);
+            if (sls == null) {
+                await AsyncStorage.setItem(
+                    "@sales:categoria",
+                    JSON.stringify([category])
+                );
+            } else {
+                sls.push(category);
+                await AsyncStorage.setItem(
+                    "@sales:categoria",
+                    JSON.stringify(sls)
+                );
+            }
+            setDescricao("");
+            setCategorias([...sls])
+            Alert.alert("Sucesso", "Dado registrado com sucesso!");
+            navigation.navigate("Vendas", { update: true });
+        } catch (error) {
+            Alert.alert(
+                "Ocorreu um erro",
+                "Infelizmente não consegui cadastrar estes dados!"
+            );
+            return;
+        }
+    }
+
+    const handleRemoveCategory = async (id) => {
+        const slsString = await AsyncStorage.getItem("@sales:categoria");
+        let sls = JSON.parse(slsString);
+        sls = sls.filter(c => c.id !== id)
+        console.log(sls)
+
+        await AsyncStorage.setItem(
+            "@sales:categoria",
+            JSON.stringify(sls)
+        );
+        setCategorias([...sls])
+    }
 
     const handleClear = () => {
         setCliente("");
@@ -448,7 +450,7 @@ const FormNew = ({ navigation, data }) => {
                         autoCapitalize="characters"
                     />
                     <Pressable
-                        onPress={handleCadastrar}
+                        onPress={handleCadastrarCategory}
                         style={styles.btnCadastrarFunc}
                     >
                         {({ pressed }) => (
@@ -457,6 +459,25 @@ const FormNew = ({ navigation, data }) => {
                             </Text>
                         )}
                     </Pressable>
+                    {categorias.length > 0 &&
+                        categorias.map(({ id, descricao }) => {
+                            return (
+                                <View key={id}>
+                                    <View style={[styles.card, { marginVertical: 10 }]}>
+                                        <MaterialIcons
+                                            name="delete"
+                                            color="#FFF"
+                                            size={25}
+                                            style={styles.trash}
+                                            onPress={() => handleRemoveCategory(id)}
+                                        />
+                                        <Text style={styles.listField}>
+                                            {`Categoria: ${descricao}`}
+                                        </Text>
+                                    </View>
+                                </View>
+                            );
+                        })}
                 </>
             )}
         </View>
