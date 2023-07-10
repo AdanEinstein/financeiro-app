@@ -26,6 +26,11 @@
         "backgroundColor": "#222222"
       },
       "package": "com.adaneinstein.financeiro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e8844b9d-74c8-4e5e-9759-9c9275aab7a9"
+      }
     }
   }
 }

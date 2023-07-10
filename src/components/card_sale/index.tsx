@@ -1,62 +1,17 @@
-import { useEffect, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import styles from "./styles";
 import moment from "moment";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import useCardSale from "./hooks";
 
-export default function CardSale({ sale, navigation, setUpdate, update }) {
-    const [total, setTotal] = useState(0.0);
-
-    useEffect(() => {
-        const totalCalculado = sale.produtos
-            .map((p) => {
-                return Number.parseFloat(
-                    p.preco.replace(".", "").replace(",", ".")
-                );
-            })
-            .reduce((acc, atual) => (acc += atual), 0);
-        setTotal(totalCalculado);
-    }, [sale]);
-
-    const handleSale = () => {
-        navigation.navigate("Novo", { data: sale });
-    };
-
-    const handlePagar = async () => {
-        const newSale = sale;
-        newSale.pago = true;
-        const sls = JSON.parse(await AsyncStorage.getItem("@sales:venda"));
-        const newSls = sls.map((s) => {
-            if (s.id == sale.id) return newSale;
-            return s;
-        });
-        await AsyncStorage.setItem("@sales:venda", JSON.stringify(newSls));
-        setUpdate(true);
-    };
-
-    const handleDespagar = async () => {
-        const newSale = sale;
-        newSale.pago = false;
-        const sls = JSON.parse(await AsyncStorage.getItem("@sales:venda"));
-        const newSls = sls.map((s) => {
-            if (s.id == sale.id) return newSale;
-            return s;
-        });
-        await AsyncStorage.setItem("@sales:venda", JSON.stringify(newSls));
-        setUpdate(true);
-    };
-
-    const handleDeletar = async () => {
-        const sls = JSON.parse(await AsyncStorage.getItem("@sales:venda"));
-        const newSls = sls.filter((s) => s.id !== sale.id);
-        await AsyncStorage.setItem("@sales:venda", JSON.stringify(newSls));
-        setUpdate(true);
-    };
-
-    const handleJaPago = () => {
-        Alert.alert("Lembrete", "Venda já estava paga :)");
-    };
+export default function CardSale({ sale, setUpdate }: { sale: Data, setUpdate: (...args: any) => void }) {
+    const {handleSale, handlePagar, handleJaPago, handleDeletar, handleDespagar} = useCardSale({sale, setUpdate})
+    const totalCalculado = sale.produtos
+        .map(p => p.preco)
+        .map(p => p.replace('.', ''))
+        .map(p => p.replace(',', '.'))
+        .map(p => parseFloat(p))
+        .reduce((acc, atual) => (acc += atual), 0);
 
     return (
         <Pressable onPress={!sale.pago ? handleSale : handleJaPago}>
@@ -70,17 +25,13 @@ export default function CardSale({ sale, navigation, setUpdate, update }) {
                     {sale.pago && <Text style={styles.pago}>Pago</Text>}
                 </View>
                 <Text style={styles.preco}>
-                    R${" "}
-                    {total
-                        .toFixed(2)
-                        .replace(".", ",")
-                        .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")}
+                    {Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(totalCalculado)}
                 </Text>
                 <Text style={styles.dataParaPagar}>
                     {moment(sale.dataDaVenda).format("DD/MM/YYYY")} -{" "}
                     {moment(sale.dataParaPagar).format("DD/MM/YYYY")}
                 </Text>
-                <Text style={styles.categoria}>{sale.categoria}</Text>
+                <Text style={styles.categoria}>{sale.categoria.descricao}</Text>
                 <View style={styles.botoes}>
                     <Pressable
                         style={{ zIndex: 10 }}

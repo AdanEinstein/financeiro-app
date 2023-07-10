@@ -3,8 +3,18 @@ import { MaterialIcons } from "@expo/vector-icons"
 import Home from "../screens/Home"
 import Sales from "../screens/Sales";
 import New from "../screens/New";
+import { RouteProp } from "@react-navigation/native";
 
-const {Navigator, Screen} = createBottomTabNavigator()
+export type TabParamList = {
+    Home: undefined;
+    Vendas: undefined;
+    Novo: { data: Data };
+};
+
+export type NewScreenRouteProp = RouteProp<TabParamList, 'Novo'>;
+
+
+const {Navigator, Screen} = createBottomTabNavigator<TabParamList>()
 
 export default function AppRoutes(){
     return (
